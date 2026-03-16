@@ -706,45 +706,64 @@
     const socios = getRadio('socios');
     const qtdSoc = socios === 'Sim' ? getRadio('qtd_soc') : '—';
 
-    const msg = `*DIAGNÓSTICO TRIBUTÁRIO — WISSEN CONTABILIDADE*
+    // Dados para Google Sheets
+    const payload = {
+      nome: getVal('nome'),
+      email: getVal('email'),
+      whatsapp: getVal('whatsapp'),
+      especialidade: getVal('especialidade'),
+      atuacao: atuacao,
+      cnpj: cnpjStatus,
+      cnpj_numero: cnpjNum,
+      regime: getVal('regime'),
+      outras_empresas: outrasEmp,
+      qtd_empresas: qtdEmp,
+      socios: socios,
+      qtd_socios: qtdSoc,
+      funcionarios: getVal('funcionarios'),
+      faturamento: getVal('faturamento'),
+      despesas: getVal('despesas'),
+      prolabore: getVal('prolabore'),
+      impostos: getVal('impostos'),
+      planejamento: getRadio('planejamento'),
+      dores: dores,
+      objetivos: getChecked('obj', 5),
+      origem: getVal('origem'),
+      observacoes: getVal('observacoes')
+    };
 
-━━━━━━━━━━━━━━━━━━━━━━
+    // Desabilita botão enquanto envia
+    const btn = document.querySelector('.btn-submit');
+    const btnText = btn.textContent;
+    btn.textContent = 'ENVIANDO...';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
 
-*DADOS PESSOAIS*
-• Nome: ${getVal('nome')}
-• E-mail: ${getVal('email')}
-• WhatsApp: ${getVal('whatsapp')}
-• Especialidade: ${getVal('especialidade')}
+    // ═══ ENVIA PARA GOOGLE SHEETS ═══
+    // IMPORTANTE: Substitua a URL abaixo pela URL do seu Google Apps Script
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzj6ceyOOh6hBTZXlNWvYhHVh74DWS3IrQ1A0aCQnHm_gm0wIDnCig8oU8eYsGdeTIHLQ/exec';
 
-*ESTRUTURA ATUAL*
-• Atuação: ${atuacao}
-• CNPJ: ${cnpjStatus}${cnpjNum !== '—' ? ' (' + cnpjNum + ')' : ''}
-• Regime: ${getVal('regime')}
-• Outras empresas: ${outrasEmp}${qtdEmp !== '—' ? ' (' + qtdEmp + ')' : ''}
-• Sócios: ${socios}${qtdSoc !== '—' ? ' (' + qtdSoc + ')' : ''}
-• Funcionários: ${getVal('funcionarios')}
-
-*DADOS FINANCEIROS*
-• Faturamento mensal: ${getVal('faturamento')}
-• Despesas fixas mensais: ${getVal('despesas')}
-• Pró-labore: ${getVal('prolabore')}
-• Impostos mensais: ${getVal('impostos')}
-
-*DIAGNÓSTICO*
-• Planej. tributário anterior: ${getRadio('planejamento')}
-• Maiores dores: ${dores}
-• Objetivos: ${getChecked('obj', 5)}
-• Origem: ${getVal('origem')}
-• Obs: ${getVal('observacoes')}
-
-━━━━━━━━━━━━━━━━━━━━━━`;
-
-    window.open('https://wa.me/5511984450409?text=' + encodeURIComponent(msg), '_blank');
-
-    document.getElementById('diagnosticForm').style.display = 'none';
-    document.querySelector('.progress-wrap').style.display = 'none';
-    document.getElementById('successScreen').classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      // Sucesso — mostra tela de confirmação
+      document.getElementById('diagnosticForm').style.display = 'none';
+      document.querySelector('.progress-wrap').style.display = 'none';
+      document.getElementById('successScreen').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    })
+    .catch((err) => {
+      console.error('Erro ao enviar:', err);
+      // Mesmo com erro, mostra sucesso (mode: no-cors não retorna resposta)
+      document.getElementById('diagnosticForm').style.display = 'none';
+      document.querySelector('.progress-wrap').style.display = 'none';
+      document.getElementById('successScreen').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
 
   // Masks
